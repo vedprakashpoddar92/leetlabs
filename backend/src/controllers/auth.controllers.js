@@ -2,9 +2,23 @@ import bcrypt from "bcryptjs";
 import { db }  from "../libs/db.js";
 import { UserRole } from "../generated/prisma/index.js";
 import jwt from "jsonwebtoken";
+import { registerValidationSchema, loginValidationSchema } from "../validation/auth.validation.js";
 
 export const register = async (req, res) => {
     const { name, email, password } = req.body;
+
+    const validation = registerValidationSchema.safeParse({
+        name,
+        email,
+        password
+    })
+
+    if (!validation.success) {
+        return res.status(400).json({
+            status: false,
+            msg: validation.error.errors[0].message
+        })
+    }
 
     try {
 
@@ -68,6 +82,18 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
     const { email, password } = req.body;
+
+    const loginValidation = loginValidationSchema.safeParse({
+        email,
+        password
+    })
+
+    if (!loginValidation.success) {
+        return res.status(400).json({
+            status: false,
+            msg: loginValidation.error.errors[0].message
+        })
+    }
 
     try {
 
